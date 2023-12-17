@@ -29,18 +29,134 @@
       <height>561</height>
      </size>
     </property>
+    <property name="maximumSize">
+     <size>
+      <width>791</width>
+      <height>561</height>
+     </size>
+    </property>
     <property name="currentIndex">
      <number>0</number>
     </property>
-    <widget class="QWidget" name="tab">
+    <widget class="QWidget" name="Database">
      <attribute name="title">
-      <string>Tab 1</string>
+      <string>Table</string>
      </attribute>
+     <widget class="QTableView" name="tableView">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>40</y>
+        <width>791</width>
+        <height>491</height>
+       </rect>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>791</width>
+        <height>491</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>320</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="pushButtonAdd">
+         <property name="text">
+          <string>Add</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_Edit">
+         <property name="text">
+          <string>Edit</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonDelete">
+         <property name="text">
+          <string>Delete</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonRefresh">
+         <property name="text">
+          <string>Refresh</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
-    <widget class="QWidget" name="tab_2">
+    <widget class="QWidget" name="SQL">
      <attribute name="title">
-      <string>Tab 2</string>
+      <string>SQL Request</string>
      </attribute>
+     <widget class="QPushButton" name="pushButtonRequest">
+      <property name="geometry">
+       <rect>
+        <x>1</x>
+        <y>199</y>
+        <width>75</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Request</string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="plainTextEdit">
+      <property name="geometry">
+       <rect>
+        <x>1</x>
+        <y>229</y>
+        <width>781</width>
+        <height>192</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>192</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>781</width>
+        <height>192</height>
+       </size>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QTextEdit" name="textEdit">
+      <property name="geometry">
+       <rect>
+        <x>1</x>
+        <y>1</y>
+        <width>781</width>
+        <height>192</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>104</width>
+        <height>71</height>
+       </size>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
