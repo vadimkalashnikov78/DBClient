@@ -36,7 +36,7 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="Database">
      <attribute name="title">
@@ -50,6 +50,18 @@
         <width>791</width>
         <height>491</height>
        </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>600</width>
+        <height>400</height>
+       </size>
       </property>
       <property name="maximumSize">
        <size>
@@ -178,18 +190,24 @@
      <string>Database</string>
     </property>
     <addaction name="actionConnect_to_Server"/>
-    <addaction name="actionClose_Connecttion"/>
     <addaction name="separator"/>
     <addaction name="actionSettings"/>
-    <addaction name="actionSave"/>
     <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionOpenView"/>
-    <addaction name="actionCreate_Table"/>
+    <widget class="QMenu" name="menuOpenView">
+     <property name="title">
+      <string>OpenView</string>
+     </property>
+     <addaction name="actionDivisions"/>
+     <addaction name="actionPositions"/>
+     <addaction name="actionOrders"/>
+     <addaction name="actionStaffing"/>
+    </widget>
+    <addaction name="menuOpenView"/>
     <addaction name="actionSQL_Editor"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
@@ -232,11 +250,6 @@
     <string>Exit</string>
    </property>
   </action>
-  <action name="actionOpenView">
-   <property name="text">
-    <string>OpenView</string>
-   </property>
-  </action>
   <action name="actionCreate_Table">
    <property name="text">
     <string>Create Table</string>
@@ -250,6 +263,26 @@
   <action name="actionAbout_DBClient">
    <property name="text">
     <string>About DBClient</string>
+   </property>
+  </action>
+  <action name="actionDivisions">
+   <property name="text">
+    <string>Divisions</string>
+   </property>
+  </action>
+  <action name="actionPositions">
+   <property name="text">
+    <string>Positions</string>
+   </property>
+  </action>
+  <action name="actionOrders">
+   <property name="text">
+    <string>Orders</string>
+   </property>
+  </action>
+  <action name="actionStaffing">
+   <property name="text">
+    <string>Staffing</string>
    </property>
   </action>
  </widget>

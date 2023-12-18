@@ -1,7 +1,10 @@
+import time
+
 from PySide6 import QtWidgets
 
 
 class NewEmpForm(QtWidgets.QWidget):
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -51,7 +54,8 @@ class NewEmpForm(QtWidgets.QWidget):
         self.close()
 
     def onPushButtonOKClicked(self) -> None:
-        self.newUserSQL = f'{self.lineEdit1.text()}, {self.lineEdit2.text()}'
+        self.newUserSQL = f'INSERT INTO "HR"."Employees" (empname, birthdate) VALUES ({self.lineEdit1.text()}, {self.lineEdit2.text()})'
+        time.sleep(1)
         self.close()
 
 
