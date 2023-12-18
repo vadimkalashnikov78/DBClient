@@ -16,7 +16,7 @@ from ui.ConnectionForm import Ui_Form
 from ui.DBClient import Ui_MainWindow
 
 
-class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
+class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Блок инициации клиента для работы с базой данных
     def __init__(self, parent=None):
@@ -39,19 +39,17 @@ class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
         self.installEventFilter(self)
 
         if self.connect.status == 1:
-            self.show_view_table(self.SQL_request_emp) # Первыми показываем список сотрудников
+            self.show_view_table(self.SQL_request_emp)  # Первыми показываем список сотрудников
 
 # Обработчик событий
     def eventFilter(self, obj, event):
         if event.type() == QtWidgets.QTableView.entered:
             print(event)
 
-
         return super().eventFilter(obj, event)
 
     # def initThreads(self) -> None:
         # self.thread_new = WorkerNew()
-
 
     # Функции подключения к базе данных и вывода основного списка работников
     def initDB(self) -> None:
@@ -75,29 +73,24 @@ class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
         self.connect.close()
         pass
 
-
     def show_view_table(self, sql_input: list) -> None:
+        sql_request1 = sql_input[0]
 
-            SQL_request1 = sql_input[0]
+        self.cursor.execute(sql_request1)
 
-            self.cursor.execute(SQL_request1)
+        data = self.cursor.fetchall()
+    # print(data_emp)
+        model = QtGui.QStandardItemModel()
+        model.setHorizontalHeaderLabels(sql_input[2])
 
-            data_emp = self.cursor.fetchall()
-            # print(data_emp)
+        for elem in data:
+            list_items = []
+            for i in range(sql_input[1]):
+                list_items.append(QtGui.QStandardItem(str(elem[i])))
+            model.appendRow(list_items)
 
-
-            model = QtGui.QStandardItemModel()
-            model.setHorizontalHeaderLabels(sql_input[2])
-
-
-            for elem in data_emp:
-                list_items = []
-                for i in range(sql_input[1]):
-                    list_items.append(QtGui.QStandardItem(str(elem[i])))
-                model.appendRow(list_items)
-
-            self.tableView.setModel(model)
-            pass
+        self.tableView.setModel(model)
+        pass
 
 # Сигналы для работы основного окна приложения
     def initSignals(self):
@@ -130,15 +123,13 @@ class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Сигналы на редактирование в главном окне
 
-
-
-# Слоты для описания действий на кнопки
+    # Слоты для описания действий на кнопки
     def onMenuAboutClicked(self) -> None:
         """
         В статус бар выводится информация о программе
         :return:
         """
-        text_about = "Это программа подключения и работы с учебной базой DevDB2023 на сервере gpngw.avalon.ru. Все права защищены"
+        text_about = "Это программа подключения и работы с учебной базой DevDB2023 на сервере gpngw.avalon.ru"
         self.statusBar().showMessage(text_about)
         pass
 
@@ -151,7 +142,6 @@ class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
 
         pass
 
-
     def onPushButtonDeleteClicked(self):
         pass
 
@@ -160,8 +150,8 @@ class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
         Процедура выполнения SQL запроса на вкладке SQL Request
         :return:
         """
-        SQL_request2 = self.textEdit.toPlainText()
-        self.cursor.execute(SQL_request2)
+        sql_request2 = self.textEdit.toPlainText()
+        self.cursor.execute(sql_request2)
         data = self.cursor.fetchall()
         self.plainTextEdit.setPlainText(str(data))
         pass
@@ -171,7 +161,6 @@ class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def onPushButtonEditClicked(self):
         pass
-
 
     def show_new_emp_window(self):
         if self.win is None:
@@ -186,8 +175,6 @@ class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
     def insert_new_emp(self, new_usr: str):
         print(new_usr)
         pass
-
-
 
     def initCreds(self) -> None:
         self.host = "vpngw.avalon.ru"
@@ -207,6 +194,7 @@ class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.win2.close()
             self.win2 = None
+
     def checkConnection(self) -> None:
         self.closeDB()
         self.host = self.win2.lineEdit_servername.text()
@@ -221,7 +209,6 @@ class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
             self.win2.label_Check_Connect.setText("Connection is broken!!!")
         pass
 
-
     def initConsts(self) -> None:
         self.SQL_request_emp = ['Select empid, empname, birthdate, regaddress, contactphone, email from "HR"."Employees" order by empid;', 6,
                                 ["Employee's ID", "Employee's Name", "Birth Date", "Registration Address", "Contact Phone", "E-mail"]]
@@ -235,17 +222,18 @@ class DB_client(QtWidgets.QMainWindow, Ui_MainWindow):
                                 ["Employee's ID", "Position ID", "Division ID", "FTE", "Salary", "Event Date", "Event Type", "Order ID"]]
 
 # Форма для создания подключения к серверу
+
+
 class ServerConnection(QtWidgets.QWidget, Ui_Form):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
 
 
-
 if __name__ == '__main__':
     app = QtWidgets.QApplication()
 
-    win = DB_client()
+    win = DBClient()
 
     win.show()
 
