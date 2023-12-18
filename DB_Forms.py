@@ -5,6 +5,8 @@ class NewEmpForm(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.newUserSQL = ''
+
         self.setWindowTitle("New Employee")
         self.setMaximumSize(500, 600)
 
@@ -22,15 +24,15 @@ class NewEmpForm(QtWidgets.QWidget):
         layout2.addWidget(label2)
         layout2.addWidget(self.lineEdit2)
 
-        pushbutton_ok = QtWidgets.QPushButton()
-        pushbutton_ok.setText("OK")
+        self.pushbutton_ok = QtWidgets.QPushButton()
+        self.pushbutton_ok.setText("OK")
 
-        pushbutton_cancel = QtWidgets.QPushButton()
-        pushbutton_cancel.setText("Cancel")
+        self.pushbutton_cancel = QtWidgets.QPushButton()
+        self.pushbutton_cancel.setText("Cancel")
 
         layout3 = QtWidgets.QHBoxLayout()
-        layout3.addWidget(pushbutton_ok)
-        layout3.addWidget(pushbutton_cancel)
+        layout3.addWidget(self.pushbutton_ok)
+        layout3.addWidget(self.pushbutton_cancel)
 
         # Создание главного layout
         layout_main = QtWidgets.QVBoxLayout()
@@ -39,6 +41,18 @@ class NewEmpForm(QtWidgets.QWidget):
         layout_main.addLayout(layout3)
 
         self.setLayout(layout_main)
+        self.initButtons()
+
+    def initButtons(self) -> None:
+        self.pushbutton_ok.clicked.connect(self.onPushButtonOKClicked)
+        self.pushbutton_cancel.clicked.connect(self.onPushButtonCancelClicked)
+
+    def onPushButtonCancelClicked(self) -> None:
+        self.close()
+
+    def onPushButtonOKClicked(self) -> None:
+        self.newUserSQL = f'{self.lineEdit1.text()}, {self.lineEdit2.text()}'
+        self.close()
 
 
 if __name__ == "__main__":

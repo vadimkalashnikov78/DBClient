@@ -36,7 +36,7 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="Database">
      <attribute name="title">
@@ -156,6 +156,9 @@
         <height>71</height>
        </size>
       </property>
+      <property name="placeholderText">
+       <string>Please type arbitrary SQL query</string>
+      </property>
      </widget>
     </widget>
    </widget>
@@ -180,7 +183,6 @@
     <addaction name="actionSettings"/>
     <addaction name="actionSave"/>
     <addaction name="actionClose"/>
-    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -194,6 +196,7 @@
     <property name="title">
      <string>About</string>
     </property>
+    <addaction name="actionAbout_DBClient"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -244,7 +247,45 @@
     <string>SQL Editor</string>
    </property>
   </action>
+  <action name="actionAbout_DBClient">
+   <property name="text">
+    <string>About DBClient</string>
+   </property>
+  </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionSQL_Editor</sender>
+   <signal>triggered()</signal>
+   <receiver>tabWidget</receiver>
+   <slot>setFocus()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>401</x>
+     <y>301</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClose</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

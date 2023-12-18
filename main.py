@@ -1,7 +1,9 @@
 import psycopg2
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
+
 import db_ui
 from DB_Forms import NewEmpForm
+
 
 class DB_client(QtWidgets.QMainWindow, db_ui.Ui_MainWindow):
 
@@ -13,6 +15,8 @@ class DB_client(QtWidgets.QMainWindow, db_ui.Ui_MainWindow):
         self.initSignals()
         self.initDB()
         self.installEventFilter(self)
+        self.win = None
+        # self.initThreads()
 
 
         self.take_EmployeesList()
@@ -25,7 +29,8 @@ class DB_client(QtWidgets.QMainWindow, db_ui.Ui_MainWindow):
 
         return super().eventFilter(obj, event)
 
-
+    # def initThreads(self) -> None:
+        # self.thread_new = WorkerNew()
 
 
     # Функция подключения к базе данных и вывода основного списка работников
@@ -72,14 +77,16 @@ class DB_client(QtWidgets.QMainWindow, db_ui.Ui_MainWindow):
         self.pushButtonAdd.clicked.connect(self.onPushButtonAddClicked)
         #
         self.pushButtonDelete.clicked.connect(self.onPushButtonDeleteClicked)
-        #
+        # Сигнал для выполнения SQL запроса
         self.pushButtonRequest.clicked.connect(self.onPushButtonRequestClicked)
         #
         self.pushButton_Edit.clicked.connect(self.onPushButtonEditClicked)
         #
         self.pushButtonRefresh.clicked.connect(self.onPushButtonRefreshClicked)
         #
-        # self.menuAbout.menuAction().triggered.connect(self.onMenuAboutClicked())
+        self.actionAbout_DBClient.triggered.connect(self.onMenuAboutClicked)
+
+        self.actionSQL_Editor.triggered.connect(lambda: self.tabWidget.setCurrentIndex(1))
 
 
 
@@ -87,11 +94,11 @@ class DB_client(QtWidgets.QMainWindow, db_ui.Ui_MainWindow):
 # Слоты для описания действий на кнопки
     def onMenuAboutClicked(self) -> None:
         """
-
+        В статус бар выводится информация о программе
         :return:
         """
-        text_about = "Это программа подключения и работы с учебной базой DevDB2023 на сервере gpngw.avalon.ru \n Все права защищены"
-        print(text_about)
+        text_about = "Это программа подключения и работы с учебной базой DevDB2023 на сервере gpngw.avalon.ru. Все права защищены"
+        self.statusBar().showMessage(text_about)
         pass
 
     def onPushButtonAddClicked(self) -> None:
@@ -99,16 +106,22 @@ class DB_client(QtWidgets.QMainWindow, db_ui.Ui_MainWindow):
         Добавление элемента в список сотрудников
         :return:
         """
-        new_emp_window = QtWidgets.QApplication
-        new_emp = NewEmpForm()
-        new_emp.show()
+        self.show_new_emp_window()
+        pass
 
-        new_emp_window.exec()
 
     def onPushButtonDeleteClicked(self):
         pass
 
-    def onPushButtonRequestClicked(self):
+    def onPushButtonRequestClicked(self) -> None:
+        """
+        Процедура выполнения SQL запроса на вкладке SQL Request
+        :return:
+        """
+        SQL_request2 = self.textEdit.toPlainText()
+        self.cursor.execute(SQL_request2)
+        data = self.cursor.fetchall()
+        self.plainTextEdit.setPlainText(str(data))
         pass
 
     def onPushButtonRefreshClicked(self):
@@ -117,6 +130,16 @@ class DB_client(QtWidgets.QMainWindow, db_ui.Ui_MainWindow):
     def onPushButtonEditClicked(self):
         pass
 
+
+    def show_new_emp_window(self):
+        if self.win is None:
+            self.win = NewEmpForm()
+            self.win.show()
+            self.win.pushbutton_ok.clicked.connect(lambda: print(self.win.newUserSQL))
+
+        else:
+            self.win.close()
+            self.win = None
 
 
 
