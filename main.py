@@ -18,6 +18,9 @@ from ui.EditFormEmp import Ui_Form_Emp
 
 
 class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
+    current_serial = ""
+    current_table = ""
+    current_sql = ""
 
     # Блок инициации клиента для работы с базой данных
     def __init__(self, parent=None):
@@ -335,7 +338,8 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
         super().__init__(parent)
         self.setupUi(self)
         self.initSignal()
-        self.current_id = None
+        self.current_serial = DBClient.current_serial
+        self.current_table = DBClient.current_table
 
     def initSignal(self):
         self.pushButton_update.clicked.connect(self.emp_update)
@@ -346,6 +350,7 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
         pass
 
     def emp_new(self) -> None:
+
         pass
 
     def emp_delete(self) -> None:
