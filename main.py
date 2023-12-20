@@ -18,9 +18,6 @@ from ui.EditFormEmp import Ui_Form_Emp
 
 
 class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
-    current_serial = ""
-    current_table = ""
-    current_sql = ""
 
     # Блок инициации клиента для работы с базой данных
     def __init__(self, parent=None):
@@ -266,6 +263,7 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
             self.win_emp.close()
             self.win_emp = None
 
+    # Инициализация параметров подключения к серверу
     def initCreds(self) -> None:
         if self.first_time:
             self.host = "vpngw.avalon.ru"
@@ -334,12 +332,15 @@ class ServerConnection(QtWidgets.QWidget, Ui_Form):
 
 # Класс запускающий редактирование сотрудника
 class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
+    updated = QtCore.Signal(str)
+    deleted = QtCore.Signal(str)
+    new = QtCore.Signal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         self.initSignal()
-        self.current_serial = DBClient.current_serial
-        self.current_table = DBClient.current_table
+        self.current_id = ""
 
     def initSignal(self):
         self.pushButton_update.clicked.connect(self.emp_update)
@@ -347,13 +348,22 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
         self.pushButton_Delete.clicked.connect(self.emp_delete)
 
     def emp_update(self) -> None:
+        sql_updated = (f'UPDATE INTO "HR"."Employees" (empname, birthdate, regaddress, contactphone, email) '
+                   f'VALUES ({self.lineEdit_empname.text()}, {self.dateEdit_emp_birthdate.date()}, {self.lineEdit_regaddress.text()},'
+                   f' {self.lineEdit_emp_phone}, {self.lineEdit_emp_mail});')
+        self.updated.emit(sql_updated)
         pass
 
     def emp_new(self) -> None:
-
+        sql_new = (f'INSERT INTO "HR"."Employees" (empname, birthdate, regaddress, contactphone, email) '
+                   f'VALUES ({self.lineEdit_empname.text()}, {self.dateEdit_emp_birthdate.date()}, {self.lineEdit_regaddress.text()},'
+                   f' {self.lineEdit_emp_phone}, {self.lineEdit_emp_mail});')
+        self.new.emit(sql_new)
         pass
 
     def emp_delete(self) -> None:
+        sql_delete = f'DELETE FROM "HR"."Employees" WHERE "empid" = {self.current_id};'
+        self.deleted.emit(sql_delete)
         pass
 
 
