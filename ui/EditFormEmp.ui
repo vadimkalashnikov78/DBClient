@@ -196,9 +196,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_Close">
+      <widget class="QPushButton" name="pushButton_New">
        <property name="text">
-        <string>Close</string>
+        <string>New</string>
        </property>
       </widget>
      </item>

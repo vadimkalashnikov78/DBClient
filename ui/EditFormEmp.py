@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'EditForm.ui'
+## Form generated from reading UI file 'EditFormEmp.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.6.1
 ##
@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QApplication, QDateEdit, QGridLayout, QHBoxLayout
     QLabel, QLineEdit, QPushButton, QSizePolicy,
     QVBoxLayout, QWidget)
 
-class Ui_Form_Edit(object):
+class Ui_Form_Emp(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
@@ -142,10 +142,10 @@ class Ui_Form_Edit(object):
 
         self.horizontalLayout_7.addWidget(self.pushButton_update)
 
-        self.pushButton_Close = QPushButton(Form)
-        self.pushButton_Close.setObjectName(u"pushButton_Close")
+        self.pushButton_New = QPushButton(Form)
+        self.pushButton_New.setObjectName(u"pushButton_New")
 
-        self.horizontalLayout_7.addWidget(self.pushButton_Close)
+        self.horizontalLayout_7.addWidget(self.pushButton_New)
 
         self.pushButton_Delete = QPushButton(Form)
         self.pushButton_Delete.setObjectName(u"pushButton_Delete")
@@ -170,7 +170,7 @@ class Ui_Form_Edit(object):
         self.label_emp_phone.setText(QCoreApplication.translate("Form", u"Contact Phone", None))
         self.label_emp_mail.setText(QCoreApplication.translate("Form", u"E-mail", None))
         self.pushButton_update.setText(QCoreApplication.translate("Form", u"Update", None))
-        self.pushButton_Close.setText(QCoreApplication.translate("Form", u"Close", None))
+        self.pushButton_New.setText(QCoreApplication.translate("Form", u"New", None))
         self.pushButton_Delete.setText(QCoreApplication.translate("Form", u"Delete", None))
     # retranslateUi
 

@@ -36,8 +36,70 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
+    <widget class="QWidget" name="SQL">
+     <attribute name="title">
+      <string>SQL Request</string>
+     </attribute>
+     <widget class="QPushButton" name="pushButtonRequest">
+      <property name="geometry">
+       <rect>
+        <x>1</x>
+        <y>199</y>
+        <width>75</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Request</string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="plainTextEdit">
+      <property name="geometry">
+       <rect>
+        <x>1</x>
+        <y>229</y>
+        <width>781</width>
+        <height>192</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>192</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>781</width>
+        <height>192</height>
+       </size>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QTextEdit" name="textEdit">
+      <property name="geometry">
+       <rect>
+        <x>1</x>
+        <y>1</y>
+        <width>781</width>
+        <height>192</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>104</width>
+        <height>71</height>
+       </size>
+      </property>
+      <property name="placeholderText">
+       <string>Please type arbitrary SQL query</string>
+      </property>
+     </widget>
+    </widget>
     <widget class="QWidget" name="Database">
      <attribute name="title">
       <string>Table</string>
@@ -111,68 +173,6 @@
       </layout>
      </widget>
     </widget>
-    <widget class="QWidget" name="SQL">
-     <attribute name="title">
-      <string>SQL Request</string>
-     </attribute>
-     <widget class="QPushButton" name="pushButtonRequest">
-      <property name="geometry">
-       <rect>
-        <x>1</x>
-        <y>199</y>
-        <width>75</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Request</string>
-      </property>
-     </widget>
-     <widget class="QPlainTextEdit" name="plainTextEdit">
-      <property name="geometry">
-       <rect>
-        <x>1</x>
-        <y>229</y>
-        <width>781</width>
-        <height>192</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>192</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>781</width>
-        <height>192</height>
-       </size>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QTextEdit" name="textEdit">
-      <property name="geometry">
-       <rect>
-        <x>1</x>
-        <y>1</y>
-        <width>781</width>
-        <height>192</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>104</width>
-        <height>71</height>
-       </size>
-      </property>
-      <property name="placeholderText">
-       <string>Please type arbitrary SQL query</string>
-      </property>
-     </widget>
-    </widget>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -191,7 +191,6 @@
     </property>
     <addaction name="actionConnect_to_Server"/>
     <addaction name="separator"/>
-    <addaction name="actionSettings"/>
     <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuTools">
@@ -206,6 +205,7 @@
      <addaction name="actionPositions"/>
      <addaction name="actionOrders"/>
      <addaction name="actionStaffing"/>
+     <addaction name="actionEmployees"/>
     </widget>
     <addaction name="menuOpenView"/>
     <addaction name="actionSQL_Editor"/>
@@ -283,6 +283,11 @@
   <action name="actionStaffing">
    <property name="text">
     <string>Staffing</string>
+   </property>
+  </action>
+  <action name="actionEmployees">
+   <property name="text">
+    <string>Employees</string>
    </property>
   </action>
  </widget>
