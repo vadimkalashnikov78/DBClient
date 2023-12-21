@@ -1,23 +1,8 @@
-# -*- coding: utf-8 -*-
 
-################################################################################
-## Form generated from reading UI file 'EditFormEmp.ui'
-##
-## Created by: Qt User Interface Compiler version 6.6.1
-##
-## WARNING! All changes made in this file will be lost when recompiling UI file!
-################################################################################
+from PySide6.QtCore import (QCoreApplication, QMetaObject, QSize)
+from PySide6.QtWidgets import (QDateEdit, QGridLayout, QHBoxLayout,
+                               QLabel, QLineEdit, QPushButton, QVBoxLayout)
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QDateEdit, QGridLayout, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QSizePolicy,
-    QVBoxLayout, QWidget)
 
 class Ui_Form_Emp(object):
     def setupUi(self, Form):
@@ -44,7 +29,6 @@ class Ui_Form_Emp(object):
 
         self.horizontalLayout.addWidget(self.lineEdit_empid)
 
-
         self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.horizontalLayout_2 = QHBoxLayout()
@@ -60,7 +44,6 @@ class Ui_Form_Emp(object):
         self.lineEdit_empname.setMinimumSize(QSize(200, 0))
 
         self.horizontalLayout_2.addWidget(self.lineEdit_empname)
-
 
         self.verticalLayout.addLayout(self.horizontalLayout_2)
 
@@ -173,4 +156,3 @@ class Ui_Form_Emp(object):
         self.pushButton_New.setText(QCoreApplication.translate("Form", u"New", None))
         self.pushButton_Delete.setText(QCoreApplication.translate("Form", u"Delete", None))
     # retranslateUi
-

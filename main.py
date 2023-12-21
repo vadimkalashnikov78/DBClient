@@ -11,6 +11,7 @@
 import psycopg2
 import datetime
 from PySide6 import QtGui, QtWidgets, QtCore
+from PySide6.QtWidgets import QMessageBox
 
 from ui.ConnectionForm import Ui_Form
 from ui.DBClient import Ui_MainWindow
@@ -23,6 +24,7 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         # Инициализация настроек
+        self.win_message = QMessageBox(self)
         self.settings = QtCore.QSettings("DBClientSettings")
 
         # Инициализация констант для подключения к таблицам Базы данных
@@ -142,7 +144,7 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionAbout_DBClient.triggered.connect(self.onMenuAboutClicked)
 
         # Переход к редактору SQL запросов
-        self.actionSQL_Editor.triggered.connect(lambda: self.tabWidget.setCurrentIndex(1))
+        self.actionSQL_Editor.triggered.connect(lambda: self.tabWidget.setCurrentIndex(0))
 
         # Переход к другим представлениям в разделе Меню OpenView
         self.actionDivisions.triggered.connect(self.onDivisions)
@@ -157,6 +159,7 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         # Сигналы на редактирование в главном окне
 
     # Слоты для описания действий на кнопки
+
     def onMenuAboutClicked(self) -> None:
         """
         В статус бар выводится информация о программе
@@ -173,7 +176,50 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         pass
 
-    def onPushButtonDeleteClicked(self):
+    # Функция удаления элемента
+    def onPushButtonDeleteClicked(self) -> None:
+        current_row = self.tableView.selectionModel().currentIndex().row()
+        if current_row == -1:
+            self.statusBar().showMessage("Не выбран элемент таблицы")
+            return None
+        row_data = self.model.takeRow(current_row)
+        # Удаление сотрудника
+        if self.activeSQL_request == self.SQL_request_emp:
+            print(row_data[0].text())
+            x_sql = f'DELETE FROM "HR"."Employees" WHERE "empid" = {row_data[0].text()};'
+            self.cursor.execute('begin;' + x_sql + 'commit;')
+            self.show_view_table(self.activeSQL_request)
+        # Удаление подразделения
+        if self.activeSQL_request == self.SQL_request_div:
+            print(row_data[0].text())
+            x_sql = f'DELETE FROM "HR"."Divisions" WHERE "divisionid" = {row_data[0].text()};'
+            self.cursor.execute('begin;' + x_sql + 'commit;')
+            self.show_view_table(self.activeSQL_request)
+        # Удаление позиции
+        if self.activeSQL_request == self.SQL_request_pos:
+            print(row_data[0].text())
+            x_sql = f'DELETE FROM "HR"."Positions" WHERE "positionid" = {row_data[0].text()};'
+            self.cursor.execute('begin;' + x_sql + 'commit;')
+            self.show_view_table(self.activeSQL_request)
+        # Удаление приказа
+        if self.activeSQL_request == self.SQL_request_orders:
+            print(row_data[0].text())
+            x_sql = f'DELETE FROM "Orders"."Orders" WHERE "orderid" = {row_data[0].text()};'
+            self.cursor.execute('begin;' + x_sql + 'commit;')
+            self.show_view_table(self.activeSQL_request)
+        if self.activeSQL_request == self.SQL_request_staff:
+            self.statusBar().showMessage('Попытка удаления записи  из таблицы Staffing')
+            self.win_message.setWindowTitle('Предупреждение')
+            self.win_message.setText('Нельзя удалить запись из реестра назначений')
+            self.win_message.exec()
+            self.show_view_table(self.activeSQL_request)
+        pass
+
+    def onSQL(self, sql='') -> None:
+        if sql == '':
+            print("Никого не удаляем")
+        else:
+            self.cursor.execute(sql)
         pass
 
     # Функция выполнения произвольного SQL запроса
@@ -245,22 +291,25 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
     # ---------------
 
-    def edit_emp(self):
+    def edit_emp(self) -> None:
         if self.win_emp is None:
-            self.win_emp = EditEmp()
-            xz = self.tableView.selectionModel().currentIndex().row()
-            data_emp = self.model.takeRow(xz)
-# Заполнение формы для редактирования данными текущего элемента
-            self.win_emp.lineEdit_empid.setText(data_emp[0].text())
-            self.win_emp.lineEdit_empname.setText(data_emp[1].text())
-            self.win_emp.dateEdit_emp_birthdate.setDate(datetime.date.fromisoformat(data_emp[2].text()))
-            self.win_emp.lineEdit_regaddress.setText(data_emp[3].text())
-            self.win_emp.lineEdit_emp_phone.setText(data_emp[4].text())
-            self.win_emp.lineEdit_emp_mail.setText(data_emp[5].text())
-            self.win_emp.current_id = data_emp[0].text()
-            self.win_emp.show()
+            if self.tableView.selectionModel().currentIndex().row() == -1:
+                self.statusBar().showMessage("Не выбран элемент")
+                return None
+            else:
+                current_row = self.tableView.selectionModel().currentIndex().row()
+                data_emp = self.model.takeRow(current_row)
+    # Задание параметров текущего пользователя
+            user = dict({"empid": f'{data_emp[0].text()}',
+                    "name": data_emp[1].text(),
+                    "birthday": datetime.date.fromisoformat(data_emp[2].text()),
+                    "address": data_emp[3].text(),
+                    "phone": data_emp[4].text(),
+                    "email": data_emp[5].text()})
+            self.win_emp = EditEmp(self, user)
+
+    #  --- Конец Заполнения формы для редактирования данными текущего элемента
         else:
-            self.win_emp.close()
             self.win_emp = None
 
     # Инициализация параметров подключения к серверу
@@ -332,38 +381,66 @@ class ServerConnection(QtWidgets.QWidget, Ui_Form):
 
 # Класс запускающий редактирование сотрудника
 class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
-    updated = QtCore.Signal(str)
-    deleted = QtCore.Signal(str)
-    new = QtCore.Signal(str)
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, parent1=None, user=None):
+        super(EditEmp, self).__init__()
+        self.parent = parent1
+        self.user = user
         self.setupUi(self)
-        self.initSignal()
-        self.current_id = ""
+        self.initSignals()
+        self.lineEdit_empid.setText(self.user["empid"])
+        self.lineEdit_empname.setText(self.user["name"])
+        self.dateEdit_emp_birthdate.setDate(self.user["birthday"])
+        self.lineEdit_regaddress.setText(self.user["address"])
+        self.lineEdit_emp_phone.setText(self.user["phone"])
+        self.lineEdit_emp_mail.setText(self.user["email"])
+        self.show()
 
-    def initSignal(self):
+    def initSignals(self):
         self.pushButton_update.clicked.connect(self.emp_update)
         self.pushButton_New.clicked.connect(self.emp_new)
         self.pushButton_Delete.clicked.connect(self.emp_delete)
 
-    def emp_update(self) -> None:
-        sql_updated = (f'UPDATE INTO "HR"."Employees" (empname, birthdate, regaddress, contactphone, email) '
-                   f'VALUES ({self.lineEdit_empname.text()}, {self.dateEdit_emp_birthdate.date()}, {self.lineEdit_regaddress.text()},'
-                   f' {self.lineEdit_emp_phone}, {self.lineEdit_emp_mail});')
-        self.updated.emit(sql_updated)
+    def emp_new(self) -> None:
+        self.pushButton_New.hide()
+        self.pushButton_update.setText("Save")
+        self.pushButton_Delete.setText("Close")
+        self.lineEdit_empid.setText("")
+        self.lineEdit_empname.setText("")
+        self.lineEdit_regaddress.setText("")
+        self.lineEdit_emp_mail.setText("")
+        self.lineEdit_emp_phone.setText("")
+        self.dateEdit_emp_birthdate.setDate(datetime.date.today())
         pass
 
-    def emp_new(self) -> None:
-        sql_new = (f'INSERT INTO "HR"."Employees" (empname, birthdate, regaddress, contactphone, email) '
-                   f'VALUES ({self.lineEdit_empname.text()}, {self.dateEdit_emp_birthdate.date()}, {self.lineEdit_regaddress.text()},'
-                   f' {self.lineEdit_emp_phone}, {self.lineEdit_emp_mail});')
-        self.new.emit(sql_new)
+    def emp_update(self) -> None:
+        if self.pushButton_update.text() == "Save":
+            print("OK, вставляю новое значение")
+            # year = self.dateEdit_emp_birthdate.date().year()
+            # month = self.dateEdit_emp_birthdate.date().month()
+            # day = self.dateEdit_emp_birthdate.date().day()
+            # birthday_text = "'" + str(f'{year}-{month}-{day}') + "'"
+            sql_update = f'begin;' + f'INSERT INTO "HR"."Employees" (empname, birthdate, regaddress, contactphone, email) VALUES ({self.lineEdit_empname.text()}, current_date, {self.lineEdit_regaddress.text()}, {self.lineEdit_emp_phone.text()}, {self.lineEdit_emp_mail.text()});' + f'commit;'
+
+            print(sql_update)
+            self.parent.onSQL(sql_update)
+            self.close()
+
+        else:
+            sql_update = f'begin;' + f' UPDATE "HR"."Employees" SET "empname" = "{self.lineEdit_empname.text()}", "regaddress" = "{self.lineEdit_regaddress.text()}", "contactphone" = "{self.lineEdit_emp_phone.text()}", "email" = "{self.lineEdit_emp_mail.text()}" WHERE "empid" = {self.lineEdit_empid.text()};' + f'commit;'
+            print(sql_update)
+            self.parent.onSQL(sql_update)
+            self.close()
         pass
 
     def emp_delete(self) -> None:
-        sql_delete = f'DELETE FROM "HR"."Employees" WHERE "empid" = {self.current_id};'
-        self.deleted.emit(sql_delete)
+        if self.pushButton_Delete.text() == "Close":
+            self.close()
+        else:
+            sql_delete = f'begin;' + f'DELETE FROM "HR"."Employees" WHERE "empid" = {self.user["empid"]};' + f'commit;'
+            print(sql_delete)
+            self.parent.onSQL(sql_delete)
+            self.close()
+
         pass
 
 
