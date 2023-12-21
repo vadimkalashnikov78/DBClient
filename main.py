@@ -426,7 +426,11 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
             self.close()
 
         else:
-            sql_update = f'begin;' + f' UPDATE "HR"."Employees" SET "empname" = "{self.lineEdit_empname.text()}", "regaddress" = "{self.lineEdit_regaddress.text()}", "contactphone" = "{self.lineEdit_emp_phone.text()}", "email" = "{self.lineEdit_emp_mail.text()}" WHERE "empid" = {self.lineEdit_empid.text()};' + f'commit;'
+            sql_update = f'begin;' + (f' UPDATE "HR"."Employees" SET '
+                                      f'"regaddress" = \'{self.lineEdit_regaddress.text()}\','
+                                      f' "contactphone" = \'{self.lineEdit_emp_phone.text()}\','
+                                      f' "email" = \'{self.lineEdit_emp_mail.text()}\''
+                                      f' WHERE "empid" = {self.user["empid"]};') + f'commit;'
             print(sql_update)
             self.parent.onSQL(sql_update)
             self.close()
