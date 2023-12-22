@@ -461,6 +461,7 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
         self.setupUi(self)
         self.initSignals()
         self.lineEdit_empid.setText(self.user["empid"])
+        self.lineEdit_empid.setStyleSheet("background-color: grey")
         self.lineEdit_empname.setText(self.user["name"])
         self.dateEdit_emp_birthdate.setDate(self.user["birthday"])
         self.lineEdit_regaddress.setText(self.user["address"])
@@ -494,7 +495,9 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
             # month = self.dateEdit_emp_birthdate.date().month()
             # day = self.dateEdit_emp_birthdate.date().day()
             # birthday_text = "'" + str(f'{year}-{month}-{day}') + "'"
-            sql_update = f'begin;' + f'INSERT INTO "HR"."Employees" (empname, birthdate, regaddress, contactphone, email) VALUES ({self.lineEdit_empname.text()}, current_date, {self.lineEdit_regaddress.text()}, {self.lineEdit_emp_phone.text()}, {self.lineEdit_emp_mail.text()});' + f'commit;'
+            sql_update = f'begin;' + (f'INSERT INTO "HR"."Employees" (empname, birthdate, regaddress, contactphone, email)'
+                                      f' VALUES (\'{self.lineEdit_empname.text()}\', current_date, \'{self.lineEdit_regaddress.text()}\','
+                                      f' \'{self.lineEdit_emp_phone.text()}\', \'{self.lineEdit_emp_mail.text()}\');') + f'commit;'
 
             print(sql_update)
             self.parent.onSQL(sql_update)
@@ -534,6 +537,7 @@ class EditOrder(QtWidgets.QWidget, Ui_Form_Order):
         self.setupUi(self)
         self.initSignals()
         self.lineEdit_orderid.setText(self.order["orderid"])
+        self.lineEdit_orderid.setStyleSheet("background-color: grey")
         self.lineEdit_signedby.setText(self.order["signedby"])
         self.dateEdit_orderdate.setDate(self.order["orderdate"])
         self.lineEdit_order_number.setText(self.order["ordernumber"])
@@ -597,6 +601,7 @@ class EditPosition(QtWidgets.QWidget, Ui_Form_Position):
         self.setupUi(self)
         self.initSignals()
         self.lineEdit_positionid.setText(self.position["positionid"])
+        self.lineEdit_positionid.setStyleSheet("background-color: grey")
         self.lineEdit_positionname.setText(self.position["positionname"])
         self.lineEdit_salarymin.setText(self.position["salarymin"])
         self.lineEdit_salarymax.setText(self.position["salarymax"])
