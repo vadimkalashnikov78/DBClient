@@ -17,6 +17,7 @@ from ui.ConnectionForm import Ui_Form
 from ui.DBClient import Ui_MainWindow
 from ui.EditFormEmp import Ui_Form_Emp
 from ui.EditFormOrder import Ui_Form_Order
+from ui.EditFormPositions import Ui_Form_Position
 
 
 class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -70,11 +71,12 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         self.win_serv = None   # Окно редактирования параметров сервера
         self.win_emp = None    # Окно редактирования сотрудника
         self.win_order = None  # Окно редактирования приказа
+        self.win_position = None  # Окно редактирования приказа
         # --- Конец инициации всплывающих окон для редактирования данных
 
         self.initSignals()
         self.installEventFilter(self)
-
+        # self.Connect()
         self.activeSQL_request = self.SQL_request_emp  # Первыми показываем список сотрудников
         self.show_view_table(self.activeSQL_request)  # Первыми показываем список сотрудников
 
@@ -180,6 +182,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
             self.edit_emp(True)
         if self.activeSQL_request == self.SQL_request_orders:
             self.edit_order(True)
+        if self.activeSQL_request == self.SQL_request_pos:
+            self.edit_position(True)
         pass
 
     def onPushButtonEditClicked(self) -> None:
@@ -191,6 +195,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
             self.edit_emp(False)
         if self.activeSQL_request == self.SQL_request_orders:
             self.edit_order(False)
+        if self.activeSQL_request == self.SQL_request_pos:
+            self.edit_position(False)
         pass
 
     # Функция удаления элемента
@@ -354,7 +360,30 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
             self.win_emp = None
             self.refreshView()
 
-        # --- Конец функции вызова формы редактирования пользователя
+        # --- Конец функции вызова формы редактирования приказа
+
+        # Функция вызова формы редактирования позиции
+    def edit_position(self, new=False) -> None:
+        if self.win_position is None:
+            if self.tableView.selectionModel().currentIndex().row() == -1:
+                self.statusBar().showMessage("Не выбран элемент")
+                return None
+            else:
+                current_row = self.tableView.selectionModel().currentIndex().row()
+                data_pos = self.model.takeRow(current_row)
+                # Задание параметров текущего пользователя
+            position = dict({"positionid": f'{data_pos[0].text()}',
+                        "positionname": data_pos[1].text(),
+                        "salarymin": data_pos[2].text(),
+                        "salarymax": data_pos[3].text()})
+            self.win_position = EditPosition(self, position, new)
+            self.refreshView()
+            #  --- Конец Заполнения и активации формы для редактирования данными текущего пользователя
+        else:
+            self.win_position = None
+            self.refreshView()
+
+        # --- Конец функции вызова формы редактирования приказа
 
     # Инициализация параметров подключения к серверу
     def initCreds(self) -> None:
@@ -557,6 +586,70 @@ class EditOrder(QtWidgets.QWidget, Ui_Form_Order):
             self.close()
         pass
 # --- Конец описания класса редактирования приказов
+
+
+# Класс запускающий редактирование должностей
+class EditPosition(QtWidgets.QWidget, Ui_Form_Position):
+    def __init__(self, parent1=None, position=None, new=False):
+        super(EditPosition, self).__init__()
+        self.parent = parent1
+        self.position = position
+        self.setupUi(self)
+        self.initSignals()
+        self.lineEdit_positionid.setText(self.position["positionid"])
+        self.lineEdit_positionname.setText(self.position["positionname"])
+        self.lineEdit_salarymin.setText(self.position["salarymin"])
+        self.lineEdit_salarymax.setText(self.position["salarymax"])
+        self.show()
+        if new:
+            self.position_new()
+
+    def initSignals(self):
+        self.pushButton_update.clicked.connect(self.position_update)
+        self.pushButton_New.clicked.connect(self.position_new)
+        self.pushButton_Delete.clicked.connect(self.position_delete)
+
+    def position_new(self) -> None:
+        self.pushButton_New.hide()
+        self.pushButton_update.setText("Save")
+        self.pushButton_Delete.setText("Close")
+        self.lineEdit_positionid.setText("")
+        self.lineEdit_positionname.setText("")
+        self.lineEdit_salarymin.setText("")
+        self.lineEdit_salarymax.setText("")
+        pass
+
+    def position_update(self) -> None:
+        if self.pushButton_update.text() == "Save":
+            print("OK, вставляю новое значение")
+            sql_update = f'begin;' + (f'INSERT INTO "HR"."Positions" (positionname, salarymin, salarymax) VALUES (\'{self.lineEdit_positionname.text()}\','
+                                      f' \'{self.lineEdit_salarymin.text()}\', \'{self.lineEdit_salarymax.text()}\');') + f'commit;'
+
+            print(sql_update)
+            self.parent.onSQL(sql_update)
+            self.close()
+
+        else:
+            sql_update = f'begin;' + (f' UPDATE "HR"."Positions" SET '
+                                      f'"positionname" = \'{self.lineEdit_positionname.text()}\','
+                                      f'"salarymin" = \'{self.lineEdit_salarymin.text()}\','
+                                      f'"salarymax" = \'{self.lineEdit_salarymax.text()}\''
+                                      f' WHERE "positionid" = {self.position["positionid"]};') + f'commit;'
+            print(sql_update)
+            self.parent.onSQL(sql_update)
+            self.close()
+        pass
+
+    def position_delete(self) -> None:
+        if self.pushButton_Delete.text() == "Close":
+            self.close()
+        else:
+            sql_delete = f'begin;' + f'DELETE FROM "HR"."Positions" WHERE "positionid" = {self.position["positionid"]};' + f'commit;'
+            print(sql_delete)
+            self.parent.onSQL(sql_delete)
+            self.close()
+        pass
+# --- Конец описания класса редактирования должностей
 
 
 if __name__ == '__main__':
