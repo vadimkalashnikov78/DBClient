@@ -16,6 +16,7 @@ from PySide6.QtWidgets import QMessageBox
 from ui.ConnectionForm import Ui_Form
 from ui.DBClient import Ui_MainWindow
 from ui.EditFormEmp import Ui_Form_Emp
+from ui.EditFormOrder import Ui_Form_Order
 
 
 class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -68,6 +69,7 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         self.win_div = None
         self.win_serv = None   # Окно редактирования параметров сервера
         self.win_emp = None    # Окно редактирования сотрудника
+        self.win_order = None  # Окно редактирования приказа
         # --- Конец инициации всплывающих окон для редактирования данных
 
         self.initSignals()
@@ -133,7 +135,7 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         # Кнопки для операций на вкладке Table
         self.pushButtonAdd.clicked.connect(self.onPushButtonAddClicked)
-        self.pushButton_Edit.clicked.connect(self.edit_emp)
+        self.pushButton_Edit.clicked.connect(self.onPushButtonEditClicked)
         self.pushButtonDelete.clicked.connect(self.onPushButtonDeleteClicked)
         self.pushButtonRefresh.clicked.connect(self.refreshView)
 
@@ -176,6 +178,19 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         if self.activeSQL_request == self.SQL_request_emp:
             self.edit_emp(True)
+        if self.activeSQL_request == self.SQL_request_orders:
+            self.edit_order(True)
+        pass
+
+    def onPushButtonEditClicked(self) -> None:
+        """
+        Добавление элемента в список сотрудников
+        :return:
+        """
+        if self.activeSQL_request == self.SQL_request_emp:
+            self.edit_emp(False)
+        if self.activeSQL_request == self.SQL_request_orders:
+            self.edit_order(False)
         pass
 
     # Функция удаления элемента
@@ -293,6 +308,7 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
     # ---------------
 
+# Функция вызова формы редактирования пользователя
     def edit_emp(self, new=False) -> None:
         if self.win_emp is None:
             if self.tableView.selectionModel().currentIndex().row() == -1:
@@ -310,11 +326,35 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
                     "email": data_emp[5].text()})
             self.win_emp = EditEmp(self, user, new)
             self.refreshView()
-
-    #  --- Конец Заполнения формы для редактирования данными текущего элемента
+    #  --- Конец Заполнения и активации формы для редактирования данными текущего пользователя
         else:
             self.win_emp = None
             self.refreshView()
+
+    # --- Конец функции вызова формы редактирования пользователя
+
+        # Функция вызова формы редактирования приказа
+    def edit_order(self, new=False) -> None:
+        if self.win_order is None:
+            if self.tableView.selectionModel().currentIndex().row() == -1:
+                self.statusBar().showMessage("Не выбран элемент")
+                return None
+            else:
+                current_row = self.tableView.selectionModel().currentIndex().row()
+                data_order = self.model.takeRow(current_row)
+                # Задание параметров текущего пользователя
+            order = dict({"orderid": f'{data_order[0].text()}',
+                        "signedby": data_order[1].text(),
+                        "orderdate": datetime.date.fromisoformat(data_order[2].text()),
+                        "ordernumber": data_order[3].text()})
+            self.win_order = EditOrder(self, order, new)
+            self.refreshView()
+            #  --- Конец Заполнения и активации формы для редактирования данными текущего пользователя
+        else:
+            self.win_emp = None
+            self.refreshView()
+
+        # --- Конец функции вызова формы редактирования пользователя
 
     # Инициализация параметров подключения к серверу
     def initCreds(self) -> None:
@@ -453,6 +493,70 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
             self.close()
 
         pass
+# --- Конец описания класса редактирования пользователя
+
+
+# Класс запускающий редактирование приказа
+class EditOrder(QtWidgets.QWidget, Ui_Form_Order):
+    def __init__(self, parent1=None, order=None, new=False):
+        super(EditOrder, self).__init__()
+        self.parent = parent1
+        self.order = order
+        self.setupUi(self)
+        self.initSignals()
+        self.lineEdit_orderid.setText(self.order["orderid"])
+        self.lineEdit_signedby.setText(self.order["signedby"])
+        self.dateEdit_orderdate.setDate(self.order["orderdate"])
+        self.lineEdit_order_number.setText(self.order["ordernumber"])
+        self.show()
+        if new:
+            self.order_new()
+
+    def initSignals(self):
+        self.pushButton_update.clicked.connect(self.order_update)
+        self.pushButton_New.clicked.connect(self.order_new)
+        self.pushButton_Delete.clicked.connect(self.order_delete)
+
+    def order_new(self) -> None:
+        self.pushButton_New.hide()
+        self.pushButton_update.setText("Save")
+        self.pushButton_Delete.setText("Close")
+        self.lineEdit_orderid.setText("")
+        self.lineEdit_signedby.setText("")
+        self.lineEdit_order_number.setText("")
+        self.dateEdit_orderdate.setDate(datetime.date.today())
+        pass
+
+    def order_update(self) -> None:
+        if self.pushButton_update.text() == "Save":
+            print("OK, вставляю новое значение")
+            sql_update = f'begin;' + (f'INSERT INTO "Orders"."Orders" (signedby, orderdate, ordernumber) VALUES (\'{self.lineEdit_signedby.text()}\','
+                                      f' current_date, \'{self.lineEdit_order_number.text()}\');') + f'commit;'
+
+            print(sql_update)
+            self.parent.onSQL(sql_update)
+            self.close()
+
+        else:
+            sql_update = f'begin;' + (f' UPDATE "Orders"."Orders" SET '
+                                      f'"signedby" = \'{self.lineEdit_signedby.text()}\','
+                                      f'"ordernumber" = \'{self.lineEdit_order_number.text()}\''
+                                      f' WHERE "orderid" = {self.order["orderid"]};') + f'commit;'
+            print(sql_update)
+            self.parent.onSQL(sql_update)
+            self.close()
+        pass
+
+    def order_delete(self) -> None:
+        if self.pushButton_Delete.text() == "Close":
+            self.close()
+        else:
+            sql_delete = f'begin;' + f'DELETE FROM "Orders"."Orders" WHERE "orderid" = {self.order["orderid"]};' + f'commit;'
+            print(sql_delete)
+            self.parent.onSQL(sql_delete)
+            self.close()
+        pass
+# --- Конец описания класса редактирования приказов
 
 
 if __name__ == '__main__':
