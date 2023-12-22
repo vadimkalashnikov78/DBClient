@@ -174,6 +174,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         Добавление элемента в список сотрудников
         :return:
         """
+        if self.activeSQL_request == self.SQL_request_emp:
+            self.edit_emp(True)
         pass
 
     # Функция удаления элемента
@@ -291,7 +293,7 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
     # ---------------
 
-    def edit_emp(self) -> None:
+    def edit_emp(self, new=False) -> None:
         if self.win_emp is None:
             if self.tableView.selectionModel().currentIndex().row() == -1:
                 self.statusBar().showMessage("Не выбран элемент")
@@ -306,11 +308,13 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
                     "address": data_emp[3].text(),
                     "phone": data_emp[4].text(),
                     "email": data_emp[5].text()})
-            self.win_emp = EditEmp(self, user)
+            self.win_emp = EditEmp(self, user, new)
+            self.refreshView()
 
     #  --- Конец Заполнения формы для редактирования данными текущего элемента
         else:
             self.win_emp = None
+            self.refreshView()
 
     # Инициализация параметров подключения к серверу
     def initCreds(self) -> None:
@@ -381,7 +385,7 @@ class ServerConnection(QtWidgets.QWidget, Ui_Form):
 
 # Класс запускающий редактирование сотрудника
 class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
-    def __init__(self, parent1=None, user=None):
+    def __init__(self, parent1=None, user=None, new=False):
         super(EditEmp, self).__init__()
         self.parent = parent1
         self.user = user
@@ -394,6 +398,8 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
         self.lineEdit_emp_phone.setText(self.user["phone"])
         self.lineEdit_emp_mail.setText(self.user["email"])
         self.show()
+        if new:
+            self.emp_new()
 
     def initSignals(self):
         self.pushButton_update.clicked.connect(self.emp_update)
@@ -427,6 +433,7 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
 
         else:
             sql_update = f'begin;' + (f' UPDATE "HR"."Employees" SET '
+                                      f'"empname" = \'{self.lineEdit_empname.text()}\','
                                       f'"regaddress" = \'{self.lineEdit_regaddress.text()}\','
                                       f' "contactphone" = \'{self.lineEdit_emp_phone.text()}\','
                                       f' "email" = \'{self.lineEdit_emp_mail.text()}\''
