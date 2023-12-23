@@ -18,6 +18,7 @@ from ui.DBClient import Ui_MainWindow
 from ui.EditFormEmp import Ui_Form_Emp
 from ui.EditFormOrder import Ui_Form_Order
 from ui.EditFormPositions import Ui_Form_Position
+from ui.EditFormDivisions import Ui_Form_Divisions
 
 
 class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -34,8 +35,9 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
                                 ["Employee's ID", "Employee's Name", "Birth Date", "Registration Address", "Contact Phone", "E-mail"]]
         self.SQL_request_pos = ['Select positionid, positionname, salarymax, salarymin from "HR"."Positions" order by positionid;', 4,
                                 ["Position ID", "Position Name", "Salary Maximum", "Salary Minimum"]]
-        self.SQL_request_div = ['Select divisionid, divisionname, parentid, bossid, eventdate, eventtype, orderid from "HR"."Divisions" order by divisionid;', 7,
-                                ["Division ID", "Division Name", "Parent ID", "Boss ID", "Event Date", "Event Type", "Order ID"]]
+        self.SQL_request_div = [f'Select divisionid, divisionname, bossid, empname, eventtype from "HR"."Divisions" as HD left join "HR"."Employees" as HE'
+                                f' on HD.bossid = HE.empid order by divisionid;', 5,
+                                ["Division ID", "Division Name", "Boss ID", "Boss Name", "Status"]]
         self.SQL_request_orders = ['Select orderid, signedby, orderdate, ordernumber from "Orders"."Orders" order by orderid;', 4,
                                 ["Order ID", "Signed By", "Order Date", "Order Number"]]
         self.SQL_request_staff = ['Select empid, positionid, divisionid, fte, salary, eventdate, eventtype, orderid from "Staff"."Staffing" order by empid;', 8,
@@ -71,7 +73,9 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         self.win_serv = None   # Окно редактирования параметров сервера
         self.win_emp = None    # Окно редактирования сотрудника
         self.win_order = None  # Окно редактирования приказа
-        self.win_position = None  # Окно редактирования приказа
+        self.win_position = None  # Окно редактирования позиции
+        self.win_division = None  # Окно редактирования подразделения
+        self.win_staffing = None  # Окно редактирования назначения
         # --- Конец инициации всплывающих окон для редактирования данных
 
         self.initSignals()
@@ -184,6 +188,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
             self.edit_order(True)
         if self.activeSQL_request == self.SQL_request_pos:
             self.edit_position(True)
+        if self.activeSQL_request == self.SQL_request_div:
+            self.edit_division(True)
         pass
 
     def onPushButtonEditClicked(self) -> None:
@@ -197,6 +203,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
             self.edit_order(False)
         if self.activeSQL_request == self.SQL_request_pos:
             self.edit_position(False)
+        if self.activeSQL_request == self.SQL_request_div:
+            self.edit_division(False)
         pass
 
     # Функция удаления элемента
@@ -383,7 +391,30 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
             self.win_position = None
             self.refreshView()
 
-        # --- Конец функции вызова формы редактирования приказа
+        # --- Конец функции вызова формы редактирования позиции
+
+        # Функция вызова формы редактирования подразделения
+    def edit_division(self, new=False) -> None:
+        if self.win_division is None:
+            if self.tableView.selectionModel().currentIndex().row() == -1:
+                self.statusBar().showMessage("Не выбран элемент")
+                return None
+            else:
+                current_row = self.tableView.selectionModel().currentIndex().row()
+                data_div = self.model.takeRow(current_row)
+                # Задание параметров текущего подразделения
+            division = dict({"divisionid": f'{data_div[0].text()}',
+                        "divisionname": data_div[1].text(),
+                        "bossname": data_div[3].text(),
+                        "status": data_div[4].text()})
+            self.win_division = EditDivision(self, division, new)
+            self.refreshView()
+            #  --- Конец Заполнения и активации формы для редактирования данными текущего подразделения
+        else:
+            self.win_division = None
+            self.refreshView()
+
+        # --- Конец функции вызова формы редактирования позиции
 
     # Инициализация параметров подключения к серверу
     def initCreds(self) -> None:
@@ -655,6 +686,72 @@ class EditPosition(QtWidgets.QWidget, Ui_Form_Position):
             self.close()
         pass
 # --- Конец описания класса редактирования должностей
+
+
+# Класс запускающий редактирование подразделений
+class EditDivision(QtWidgets.QWidget, Ui_Form_Divisions):
+    def __init__(self, parent1=None, division=None, new=False):
+        super(EditDivision, self).__init__()
+        self.parent = parent1
+        self.division = division
+        self.setupUi(self)
+        self.initSignals()
+        self.lineEdit_divisionid.setText(self.division["divisionid"])
+        self.lineEdit_divisionid.setStyleSheet("background-color: grey")
+        self.lineEdit_divisionname.setText(self.division["divisionname"])
+        self.lineEdit_bossname.setText(self.division["bossname"])
+        self.lineEdit_bossname.setStyleSheet("background-color: blue")
+        self.lineEdit_status.setText(self.division["status"])
+        self.show()
+        if new:
+            self.division_new()
+
+    def initSignals(self):
+        self.pushButton_update.clicked.connect(self.division_update)
+        self.pushButton_New.clicked.connect(self.division_new)
+        self.pushButton_Delete.clicked.connect(self.division_delete)
+
+    def division_new(self) -> None:
+        self.pushButton_New.hide()
+        self.pushButton_update.setText("Save")
+        self.pushButton_Delete.setText("Close")
+        self.lineEdit_divisionid.setText("")
+        self.lineEdit_divisionname.setText("")
+        self.lineEdit_bossname.setText("")
+        self.lineEdit_status.setText("")
+        pass
+
+    def division_update(self) -> None:
+        if self.pushButton_update.text() == "Save":
+            print("OK, вставляю новое значение")
+            sql_update = f'begin;' + (f'INSERT INTO "HR"."Divisions" (divisionname, bossid, eventdate, eventtype)'
+                                      f' VALUES (\'{self.lineEdit_divisionname.text()}\', \'22\', current_date, \'Open\');' + f'commit;')
+
+            print(sql_update)
+            self.parent.onSQL(sql_update)
+            self.close()
+
+        else:
+            sql_update = f'begin;' + (f' UPDATE "HR"."Divisions" SET '
+                                      f'"divisionname" = \'{self.lineEdit_divisionname.text()}\','
+                                      f'"eventdate" = current_date,'
+                                      f'"eventtype" = \'{self.lineEdit_status.text()}\''
+                                      f' WHERE "divisionid" = {self.division["divisionid"]};') + f'commit;'
+            print(sql_update)
+            self.parent.onSQL(sql_update)
+            self.close()
+        pass
+
+    def division_delete(self) -> None:
+        if self.pushButton_Delete.text() == "Close":
+            self.close()
+        else:
+            sql_delete = f'begin;' + f'DELETE FROM "HR"."Divisions" WHERE "divisionid" = {self.division["divisionid"]};' + f'commit;'
+            print(sql_delete)
+            self.parent.onSQL(sql_delete)
+            self.close()
+        pass
+# --- Конец описания класса редактирования подразделений
 
 
 if __name__ == '__main__':
