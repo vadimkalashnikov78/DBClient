@@ -793,23 +793,52 @@ class AddStaff(QtWidgets.QWidget, Ui_Form_Staff):
         super(AddStaff, self).__init__()
         self.parent = parent1
         self.staffing = staffing
+        self.combo_div = self.staffing["divisions"]
+        self.combo_pos = self.staffing["positions"]
+        self.combo_emp = self.staffing["employees"]
         self.setupUi(self)
         self.initSignals()
-        self.empid = ""
-        self.positionid = ""
-        self.divisionid = ""
+        self.dateEdit.setDate(datetime.date.today())
+        self.dateEdit.setStyleSheet("background-color: grey")
+        self.emp_id = ""
+        self.position_id = ""
+        self.division_id = ""
+        self.update_form()
+        self.show()
+        print(self.staffing["employees"])
 
     def initSignals(self) -> None:
         self.pushButton_Save.clicked.connect(self.addStaffing)
         self.pushButton_Cancel.clicked.connect(lambda: self.close())
 
+    def update_form(self) -> None:
+        for key, value in self.combo_emp.items():
+            self.comboBox_emp.addItem(value)
+        for key, value in self.combo_pos.items():
+            self.comboBox_pos.addItem(value)
+        for key, value in self.combo_div.items():
+            self.comboBox_div.addItem(value)
+        pass
+
     def addStaffing(self) -> None:
+        for key, value in self.combo_emp.items():
+            if self.comboBox_emp.currentText() == value:
+                self.emp_id = key
+
+        for key, value in self.combo_pos.items():
+            if self.comboBox_pos.currentText() == value:
+                self.position_id = key
+
+        for key, value in self.combo_div.items():
+            if self.comboBox_div.currentText() == value:
+                self.division_id = key
+
         print("OK, вставляю новое значение")
         sql_update = f'begin;' + (f'INSERT INTO "Staff"."Staffing" (empid, positionid, divisionid, fte, salary, eventdate, eventtype, orderid)'
-                                  f' VALUES (\'{self.empid}\', \'{self.positionid}\','
-                                  f' \'{self.divisionid}\', \'{self.lineEdit_fte}\','
-                                  f' \'{self.lineEdit_salary}\', current_date, {self.comboBox_event},'
-                                  f' \'{self.lineEdit_order}\');' + f'commit;')
+                                  f' VALUES (\'{self.emp_id}\', \'{self.position_id}\','
+                                  f' \'{self.division_id}\', \'{self.lineEdit_fte.text()}\','
+                                  f' \'{self.lineEdit_salary.text()}\', current_date, \'{self.comboBox_event.currentText()}\','
+                                  f' \'{self.lineEdit_order.text()}\');' + f'commit;')
 
         print(sql_update)
         self.parent.onSQL(sql_update)
