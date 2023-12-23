@@ -19,6 +19,7 @@ from ui.EditFormEmp import Ui_Form_Emp
 from ui.EditFormOrder import Ui_Form_Order
 from ui.EditFormPositions import Ui_Form_Position
 from ui.EditFormDivisions import Ui_Form_Divisions
+from ui.AddStaffingRecord import Ui_Form_Staff
 
 
 class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -752,6 +753,22 @@ class EditDivision(QtWidgets.QWidget, Ui_Form_Divisions):
             self.close()
         pass
 # --- Конец описания класса редактирования подразделений
+
+
+# Класс добавления в журнал назначений
+class AddStaff(QtWidgets.QWidget, Ui_Form_Staff):
+    def __init__(self, parent1=None, staffing=None):
+        super(AddStaff, self).__init__()
+        self.parent = parent1
+        self.staffing = staffing
+        self.setupUi(self)
+        self.initSignals()
+
+    def initSignals(self) -> None:
+        self.pushButton_Save.clicked.connect(self)
+        self.pushButton_Cancel.clicked.connect(lambda: self.close())
+
+
 
 
 if __name__ == '__main__':
