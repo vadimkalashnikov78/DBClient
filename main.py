@@ -191,6 +191,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
             self.edit_position(True)
         if self.activeSQL_request == self.SQL_request_div:
             self.edit_division(True)
+        if self.activeSQL_request == self.SQL_request_staff:
+            self.add_staffing()
         pass
 
     def onPushButtonEditClicked(self) -> None:
@@ -206,6 +208,11 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
             self.edit_position(False)
         if self.activeSQL_request == self.SQL_request_div:
             self.edit_division(False)
+        if self.activeSQL_request == self.SQL_request_staff:
+            self.win_message.setWindowTitle('Предупреждение')
+            self.win_message.setText('Нельзя отредактировать запись из реестра назначений!!! \n'
+                                     '- только добавить новую!')
+            self.win_message.exec()
         pass
 
     # Функция удаления элемента
@@ -416,6 +423,31 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
             self.refreshView()
 
         # --- Конец функции вызова формы редактирования позиции
+
+        # Функция вызова формы редактирования назначения
+    def add_staffing(self) -> None:
+        if self.win_staffing is None:
+            emp_sql = f'select empid, empname from "HR"."Employees";'
+            self.cursor.execute(emp_sql)
+            data_emp = self.cursor.fetchall()
+            pos_sql = f'select positionid, positionname from "HR"."Positions";'
+            self.cursor.execute(pos_sql)
+            data_pos = self.cursor.fetchall()
+            div_sql = f'select divisionid, divisionname from "HR"."Divisions";'
+            self.cursor.execute(div_sql)
+            data_div = self.cursor.fetchall()
+            #  Задание параметров для формы
+            staffing = dict({"employees": dict(data_emp), "positions": dict(data_pos), "divisions": dict(data_div)})
+            print(staffing)
+            self.win_staffing = AddStaff(self, staffing)
+            self.activeSQL_request = self.SQL_request_staff
+            self.refreshView()
+            #  --- Конец Заполнения и активации формы для редактирования данными текущего подразделения
+        else:
+            self.win_staffing = None
+            self.refreshView()
+
+        # --- Конец функции вызова формы редактирования назначения
 
     # Инициализация параметров подключения к серверу
     def initCreds(self) -> None:
@@ -763,12 +795,27 @@ class AddStaff(QtWidgets.QWidget, Ui_Form_Staff):
         self.staffing = staffing
         self.setupUi(self)
         self.initSignals()
+        self.empid = ""
+        self.positionid = ""
+        self.divisionid = ""
 
     def initSignals(self) -> None:
-        self.pushButton_Save.clicked.connect(self)
+        self.pushButton_Save.clicked.connect(self.addStaffing)
         self.pushButton_Cancel.clicked.connect(lambda: self.close())
 
+    def addStaffing(self) -> None:
+        print("OK, вставляю новое значение")
+        sql_update = f'begin;' + (f'INSERT INTO "Staff"."Staffing" (empid, positionid, divisionid, fte, salary, eventdate, eventtype, orderid)'
+                                  f' VALUES (\'{self.empid}\', \'{self.positionid}\','
+                                  f' \'{self.divisionid}\', \'{self.lineEdit_fte}\','
+                                  f' \'{self.lineEdit_salary}\', current_date, {self.comboBox_event},'
+                                  f' \'{self.lineEdit_order}\');' + f'commit;')
 
+        print(sql_update)
+        self.parent.onSQL(sql_update)
+        self.close()
+        pass
+# --- Конец описания класса добавления в журнал назначений
 
 
 if __name__ == '__main__':
