@@ -23,13 +23,15 @@ from ui.AddStaffingRecord import Ui_Form_Staff
 
 
 class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
-
+    """
+    Главное окно приложения по работе с базой данных
+    """
     # Блок инициации клиента для работы с базой данных
     def __init__(self, parent=None):
         super().__init__(parent)
         # Инициализация настроек
-        self.win_message = QMessageBox(self)
-        self.settings = QtCore.QSettings("DBClientSettings")
+        self.win_message = QMessageBox(self)  # Диалоговое окно для всплывающих сообщений
+        self.settings = QtCore.QSettings("DBClientSettings")  # Инициализация настроек
 
         # Инициализация констант для подключения к таблицам Базы данных
         self.SQL_request_emp = ['Select empid, empname, birthdate, regaddress, contactphone, email from "HR"."Employees" order by empid;', 6,
@@ -81,7 +83,6 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.initSignals()
         self.installEventFilter(self)
-        # self.Connect()
         self.activeSQL_request = self.SQL_request_emp  # Первыми показываем список сотрудников
         self.show_view_table(self.activeSQL_request)  # Первыми показываем список сотрудников
 
@@ -104,6 +105,11 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
     #############################################
 
     def saveConnectToDB(self) -> None:
+        """
+        Инициация подключения после успешной проверки и закрытие окна редактирования настроек
+        подключения к серверу
+        :return:
+        """
         if self.connect.status == 1:
             self.initDB()
             self.cursor = self.connect.cursor()
@@ -111,11 +117,22 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
 
     def closeDB(self) -> None:
+        """
+        Закрытие подключения к базе данных
+        :return:
+        """
         self.cursor.close()
         self.connect.close()
         pass
 
     def show_view_table(self, sql_input: list) -> None:
+        """
+        Загрузка данных для текущего представления TableView
+        формирование модели данных
+        5 вариантов Employees, Divisions, Positions, Orders, Staffing
+        :param sql_input: список с SQL запросом, количеством столбцов и именами столбцов
+        :return:
+        """
         sql_request1 = sql_input[0]
 
         self.cursor.execute(sql_request1)
@@ -180,7 +197,10 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def onPushButtonAddClicked(self) -> None:
         """
-        Добавление элемента в список сотрудников
+        Добавление элемента в список в соответствующем представлении,
+        по нажатию кнопки Add - вызывается соответствующая функция
+        Добавление - передается True
+        Обновление - False
         :return:
         """
         if self.activeSQL_request == self.SQL_request_emp:
@@ -197,7 +217,7 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def onPushButtonEditClicked(self) -> None:
         """
-        Добавление элемента в список сотрудников
+        Редактирование элемента в текущем представлении
         :return:
         """
         if self.activeSQL_request == self.SQL_request_emp:
@@ -217,6 +237,12 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Функция удаления элемента
     def onPushButtonDeleteClicked(self) -> None:
+        """
+        Удаление текущего выбранного ряда из представления TableView
+        кроме записи в реестре назначений, они не должны удаляться
+        :return:
+        """
+
         current_row = self.tableView.selectionModel().currentIndex().row()
         if current_row == -1:
             self.statusBar().showMessage("Не выбран элемент таблицы")
@@ -255,8 +281,13 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
 
     def onSQL(self, sql='') -> None:
+        """
+        Выполнение произвольного SQL запроса
+        :param sql:
+        :return:
+        """
         if sql == '':
-            print("Никого не удаляем")
+            print("Ничего не делаем")
         else:
             self.cursor.execute(sql)
         pass
@@ -264,7 +295,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
     # Функция выполнения произвольного SQL запроса
     def onPushButtonRequestClicked(self) -> None:
         """
-        Процедура выполнения SQL запроса на вкладке SQL Request
+        Процедура выполнения SQL запроса на вкладке SQL
+        по нажатии кнопки Request
         :return:
         """
         sql_request2 = self.textEdit.toPlainText()
@@ -276,7 +308,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
     # Функции обновления представлений в OpenView
     def onEmployees(self):
         """
-
+        Функция смены представления на Employees,
+        при выборе соответствующего пункта меню
         :return:
         """
         self.activeSQL_request = self.SQL_request_emp
@@ -285,7 +318,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def onDivisions(self):
         """
-
+        Функция смены представления на Divisions,
+        при выборе соответствующего пункта меню
         :return:
         """
         self.activeSQL_request = self.SQL_request_div
@@ -294,7 +328,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def onPositions(self):
         """
-
+        Функция смены представления на Positions,
+        при выборе соответствующего пункта меню
         :return:
         """
         self.activeSQL_request = self.SQL_request_pos
@@ -303,7 +338,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def onOrders(self):
         """
-
+        Функция смены представления на Orders,
+        при выборе соответствующего пункта меню
         :return:
         """
         self.activeSQL_request = self.SQL_request_orders
@@ -312,7 +348,8 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def onStaffing(self):
         """
-
+        Функция смены представления на Staffing,
+        при выборе соответствующего пункта меню
         :return:
         """
         self.activeSQL_request = self.SQL_request_staff
@@ -332,6 +369,11 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
 # Функция вызова формы редактирования пользователя
     def edit_emp(self, new=False) -> None:
+        """
+        Редактирование сотрудника
+        :param new:
+        :return:
+        """
         if self.win_emp is None:
             if self.tableView.selectionModel().currentIndex().row() == -1:
                 self.statusBar().showMessage("Не выбран элемент")
@@ -357,6 +399,11 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Функция вызова формы редактирования приказа
     def edit_order(self, new=False) -> None:
+        """
+        Редактирование приказа
+        :param new:
+        :return:
+        """
         if self.win_order is None:
             if self.tableView.selectionModel().currentIndex().row() == -1:
                 self.statusBar().showMessage("Не выбран элемент")
@@ -380,6 +427,11 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Функция вызова формы редактирования позиции
     def edit_position(self, new=False) -> None:
+        """
+        Редактирование должности
+        :param new:
+        :return:
+        """
         if self.win_position is None:
             if self.tableView.selectionModel().currentIndex().row() == -1:
                 self.statusBar().showMessage("Не выбран элемент")
@@ -403,6 +455,11 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Функция вызова формы редактирования подразделения
     def edit_division(self, new=False) -> None:
+        """
+        Редактирование подразделения
+        :param new:
+        :return:
+        """
         if self.win_division is None:
             if self.tableView.selectionModel().currentIndex().row() == -1:
                 self.statusBar().showMessage("Не выбран элемент")
@@ -426,6 +483,10 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Функция вызова формы редактирования назначения
     def add_staffing(self) -> None:
+        """
+        Добавление назначения, их удалять нельзя, только добавлять новые
+        :return:
+        """
         if self.win_staffing is None:
             emp_sql = f'select empid, empname from "HR"."Employees";'
             self.cursor.execute(emp_sql)
@@ -451,6 +512,10 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Инициализация параметров подключения к серверу
     def initCreds(self) -> None:
+        """
+        Инициализация данных для подключения к учебному серверу vpngw.avalon.ru
+        :return:
+        """
         if self.first_time:
             self.host = "vpngw.avalon.ru"
             self.port = "5432"
@@ -467,6 +532,11 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
         return None
 
     def Connect(self) -> None:
+        """
+        Функция вызова формы настроек подключения,
+        включая кнопки проверки подключения
+        :return:
+        """
         if self.win_serv is None:
             self.win_serv = ServerConnection()
             self.win_serv.lineEdit_servername.setText(self.host)
@@ -485,6 +555,10 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Метод проверки статус соединения к СУБД печатает статус в форме, ошибки выводятся в консоль
     def checkConnection(self) -> None:
+        """
+        Функция проверки подключения к серверу по данным заполненным в форме
+        :return:
+        """
         self.closeDB()
         self.host = self.win_serv.lineEdit_servername.text()
         self.port = self.win_serv.lineEdit_serverport.text()
@@ -500,6 +574,11 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # Метод сохраняет настройки подключения к СУБД при закрытии Главного окна приложения
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        """
+        Функция сохранения настроек подключения при закрытии главного окна
+        :param event:
+        :return:
+        """
         self.settings.setValue("Server name", self.host)
         self.settings.setValue("DB name", self.dbname)
         self.settings.setValue("Port number", self.port)
@@ -509,6 +588,9 @@ class DBClient(QtWidgets.QMainWindow, Ui_MainWindow):
 
 # Класс запускающий окно для изменения подключения к серверу
 class ServerConnection(QtWidgets.QWidget, Ui_Form):
+    """
+    класс содержащий форму настроек подключения
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -518,6 +600,9 @@ class ServerConnection(QtWidgets.QWidget, Ui_Form):
 
 # Класс запускающий редактирование сотрудника
 class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
+    """
+    Класс содержащий форму редактирования сотрудника
+    """
     def __init__(self, parent1=None, user=None, new=False):
         super(EditEmp, self).__init__()
         self.parent = parent1
@@ -541,6 +626,10 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
         self.pushButton_Delete.clicked.connect(self.emp_delete)
 
     def emp_new(self) -> None:
+        """
+        Функция переключения на создание нового пользователя
+        :return:
+        """
         self.pushButton_New.hide()
         self.pushButton_update.setText("Save")
         self.pushButton_Delete.setText("Close")
@@ -553,6 +642,12 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
         pass
 
     def emp_update(self) -> None:
+        """
+        Обновление информации о сотруднике,
+        либо вставка нового,
+        либо обновление по текущему id
+        :return:
+        """
         if self.pushButton_update.text() == "Save":
             print("OK, вставляю новое значение")
             # year = self.dateEdit_emp_birthdate.date().year()
@@ -580,6 +675,10 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
         pass
 
     def emp_delete(self) -> None:
+        """
+        Удаление сотрудника при нажатии кнопки Delete
+        :return:
+        """
         if self.pushButton_Delete.text() == "Close":
             self.close()
         else:
@@ -594,6 +693,9 @@ class EditEmp(QtWidgets.QWidget, Ui_Form_Emp):
 
 # Класс запускающий редактирование приказа
 class EditOrder(QtWidgets.QWidget, Ui_Form_Order):
+    """
+    Класс содержащий форму редактирования приказа
+    """
     def __init__(self, parent1=None, order=None, new=False):
         super(EditOrder, self).__init__()
         self.parent = parent1
@@ -615,6 +717,10 @@ class EditOrder(QtWidgets.QWidget, Ui_Form_Order):
         self.pushButton_Delete.clicked.connect(self.order_delete)
 
     def order_new(self) -> None:
+        """
+        Создание формы для нового приказа
+        :return:
+        """
         self.pushButton_New.hide()
         self.pushButton_update.setText("Save")
         self.pushButton_Delete.setText("Close")
@@ -625,6 +731,11 @@ class EditOrder(QtWidgets.QWidget, Ui_Form_Order):
         pass
 
     def order_update(self) -> None:
+        """
+        Обновление информации о приказе,
+        либо создание новой записи
+        :return:
+        """
         if self.pushButton_update.text() == "Save":
             print("OK, вставляю новое значение")
             sql_update = f'begin;' + (f'INSERT INTO "Orders"."Orders" (signedby, orderdate, ordernumber) VALUES (\'{self.lineEdit_signedby.text()}\','
@@ -645,6 +756,10 @@ class EditOrder(QtWidgets.QWidget, Ui_Form_Order):
         pass
 
     def order_delete(self) -> None:
+        """
+        Удаление приказа по нажатию кнопки Delete
+        :return:
+        """
         if self.pushButton_Delete.text() == "Close":
             self.close()
         else:
@@ -658,6 +773,9 @@ class EditOrder(QtWidgets.QWidget, Ui_Form_Order):
 
 # Класс запускающий редактирование должностей
 class EditPosition(QtWidgets.QWidget, Ui_Form_Position):
+    """
+    Класс содержащий форму редактирования должности
+    """
     def __init__(self, parent1=None, position=None, new=False):
         super(EditPosition, self).__init__()
         self.parent = parent1
@@ -679,6 +797,10 @@ class EditPosition(QtWidgets.QWidget, Ui_Form_Position):
         self.pushButton_Delete.clicked.connect(self.position_delete)
 
     def position_new(self) -> None:
+        """
+        Создание формы для новой должности
+        :return:
+        """
         self.pushButton_New.hide()
         self.pushButton_update.setText("Save")
         self.pushButton_Delete.setText("Close")
@@ -689,6 +811,11 @@ class EditPosition(QtWidgets.QWidget, Ui_Form_Position):
         pass
 
     def position_update(self) -> None:
+        """
+        Обновление значения по клику если кнопка Update активна
+        Создание новой позиции если на кнопке активна надпись Save
+        :return:
+        """
         if self.pushButton_update.text() == "Save":
             print("OK, вставляю новое значение")
             sql_update = f'begin;' + (f'INSERT INTO "HR"."Positions" (positionname, salarymin, salarymax) VALUES (\'{self.lineEdit_positionname.text()}\','
@@ -710,6 +837,10 @@ class EditPosition(QtWidgets.QWidget, Ui_Form_Position):
         pass
 
     def position_delete(self) -> None:
+        """
+        Удаление должности
+        :return:
+        """
         if self.pushButton_Delete.text() == "Close":
             self.close()
         else:
@@ -723,6 +854,9 @@ class EditPosition(QtWidgets.QWidget, Ui_Form_Position):
 
 # Класс запускающий редактирование подразделений
 class EditDivision(QtWidgets.QWidget, Ui_Form_Divisions):
+    """
+    Класс содержащий форму редактирования подразделения
+    """
     def __init__(self, parent1=None, division=None, new=False):
         super(EditDivision, self).__init__()
         self.parent = parent1
@@ -745,6 +879,10 @@ class EditDivision(QtWidgets.QWidget, Ui_Form_Divisions):
         self.pushButton_Delete.clicked.connect(self.division_delete)
 
     def division_new(self) -> None:
+        """
+        Очистка формы и изменение кнопок для ввода нового элемента в список подразделений
+        :return:
+        """
         self.pushButton_New.hide()
         self.pushButton_update.setText("Save")
         self.pushButton_Delete.setText("Close")
@@ -755,6 +893,10 @@ class EditDivision(QtWidgets.QWidget, Ui_Form_Divisions):
         pass
 
     def division_update(self) -> None:
+        """
+        Обновление информации о подразделении
+        :return:
+        """
         if self.pushButton_update.text() == "Save":
             print("OK, вставляю новое значение")
             sql_update = f'begin;' + (f'INSERT INTO "HR"."Divisions" (divisionname, bossid, eventdate, eventtype)'
@@ -776,6 +918,10 @@ class EditDivision(QtWidgets.QWidget, Ui_Form_Divisions):
         pass
 
     def division_delete(self) -> None:
+        """
+        Удаление подразделения
+        :return:
+        """
         if self.pushButton_Delete.text() == "Close":
             self.close()
         else:
@@ -789,6 +935,9 @@ class EditDivision(QtWidgets.QWidget, Ui_Form_Divisions):
 
 # Класс добавления в журнал назначений
 class AddStaff(QtWidgets.QWidget, Ui_Form_Staff):
+    """
+    Класс содержащий форму добавления записи в реестр назначений
+    """
     def __init__(self, parent1=None, staffing=None):
         super(AddStaff, self).__init__()
         self.parent = parent1
@@ -812,6 +961,11 @@ class AddStaff(QtWidgets.QWidget, Ui_Form_Staff):
         self.pushButton_Cancel.clicked.connect(lambda: self.close())
 
     def update_form(self) -> None:
+        """
+        Функция забирает значения по сотрудникам, подразделениям и должностям, чтобы в форме редактирования сделать
+        выпадающие списки - пользователю не надо набивать текст и использовать id
+        :return:
+        """
         for key, value in self.combo_emp.items():
             self.comboBox_emp.addItem(value)
         for key, value in self.combo_pos.items():
@@ -821,6 +975,10 @@ class AddStaff(QtWidgets.QWidget, Ui_Form_Staff):
         pass
 
     def addStaffing(self) -> None:
+        """
+        Формирование SQL запроса для добавления назначения в таблицу Staffing
+        :return:
+        """
         for key, value in self.combo_emp.items():
             if self.comboBox_emp.currentText() == value:
                 self.emp_id = key
@@ -833,14 +991,14 @@ class AddStaff(QtWidgets.QWidget, Ui_Form_Staff):
             if self.comboBox_div.currentText() == value:
                 self.division_id = key
 
-        print("OK, вставляю новое значение")
+        # print("OK, вставляю новое значение")
         sql_update = f'begin;' + (f'INSERT INTO "Staff"."Staffing" (empid, positionid, divisionid, fte, salary, eventdate, eventtype, orderid)'
                                   f' VALUES (\'{self.emp_id}\', \'{self.position_id}\','
                                   f' \'{self.division_id}\', \'{self.lineEdit_fte.text()}\','
                                   f' \'{self.lineEdit_salary.text()}\', current_date, \'{self.comboBox_event.currentText()}\','
                                   f' \'{self.lineEdit_order.text()}\');' + f'commit;')
 
-        print(sql_update)
+        # print(sql_update)
         self.parent.onSQL(sql_update)
         self.close()
         pass
